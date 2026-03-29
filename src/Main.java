@@ -98,6 +98,7 @@ public class Main {
         Database.saveData();
     }
 
+
     // --- Refactored Login Method ---
     private static void handleLogin(Scanner sc) {
         System.out.println("\nLogin As:");
