@@ -37,4 +37,8 @@ public class Database {
             System.out.println("Error loading database: " + e.getMessage());
         }
     }
+
+    public static boolean deleteUser(String email) {
+        return allUsers.removeIf(user -> user.getEmail().equalsIgnoreCase(email));
+    }
 }

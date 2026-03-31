@@ -115,6 +115,26 @@ public class Administrator extends User implements CourseManager {
         }
     }
 
+    public void deleteUser() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter User Email to delete: ");
+        String email = sc.nextLine();
+        
+        // Prevent admin from deleting themselves
+        if (this.getEmail().equalsIgnoreCase(email)) {
+            System.out.println("You cannot delete your own account.");
+            return;
+        }
+
+        boolean removed = Database.deleteUser(email);
+        if (removed) {
+            Database.saveData(); // Save changes to the database file immediately
+            System.out.println("User deleted successfully.");
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
     @Override
     public void showDashboard() {
         Scanner sc = new Scanner(System.in);
@@ -125,7 +145,8 @@ public class Administrator extends User implements CourseManager {
             System.out.println("3. Delete Course");
             System.out.println("4. Manage Student Records (Assign Grades)");
             System.out.println("5. Handle Complaints (Filter & Resolve)");
-            System.out.println("6. Logout");
+            System.out.println("6. Delete User");
+            System.out.println("7. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
@@ -134,7 +155,9 @@ public class Administrator extends User implements CourseManager {
             else if (choice == 3) deleteCourse();
             else if (choice == 4) manageStudentRecords();
             else if (choice == 5) handleComplaints();
-            else if (choice == 6) { logout(); break; }
+            else if (choice == 6) deleteUser();
+            else if (choice == 7) { logout(); break; }
+            else System.out.println("Invalid choice.");
         }
     }
 }

@@ -154,10 +154,6 @@ public class Main {
         Database.allUsers.add(p1);
         Database.allUsers.add(p2);
 
-        Database.allUsers.add(new Student("student1@univ.edu", "pass"));
-        Database.allUsers.add(new Student("student2@univ.edu", "pass"));
-        Database.allUsers.add(new Student("student3@univ.edu", "pass"));
-
         Course c1 = new Course("CS101", "Intro to Programming", 4, 30);
         Course c2 = new Course("CS201", "Advanced Programming", 4, 30);
         Course c3 = new Course("MATH101", "Calculus I", 4, 50);
