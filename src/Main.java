@@ -146,7 +146,7 @@ public class Main {
     }
 
     private static void initializeData() {
-        Administrator admin = new Administrator("admin@univ.edu", "admin123");
+        Administrator admin = new Administrator("admin", "admin");
         Database.allUsers.add(admin);
 
         Professor p1 = new Professor("prof1@univ.edu", "pass");
