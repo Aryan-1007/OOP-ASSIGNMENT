@@ -1,9 +1,11 @@
 import core.User;
 import student.Student;
+import student.TeachingAssistant;
 import professor.Professor;
 import administrator.Administrator;
 import models.Course;
 import utils.Database;
+import exceptions.InvalidLoginException;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
@@ -11,7 +13,6 @@ public class Main {
     public static void main(String[] args) {
         Database.loadData();
 
-        // Initialize dummy data only if the database is completely empty
         if (Database.allUsers.isEmpty()) {
             initializeData();
         }
@@ -25,12 +26,12 @@ public class Main {
             System.out.println("2. Sign Up (New Student/Professor)");
             System.out.println("3. Exit");
             System.out.print("Choose option: ");
-            
+
             try {
                 int initialChoice = sc.nextInt();
 
                 if (initialChoice == 3) {
-                    Database.saveData(); // Saves everything to the file before closing
+                    Database.saveData();
                     System.out.println("Data saved. Exiting System...");
                     break;
                 } else if (initialChoice == 2) {
@@ -42,28 +43,29 @@ public class Main {
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
-                sc.nextLine(); // Clear the invalid input
+                sc.nextLine();
+            } catch (InvalidLoginException e) {
+                System.out.println("\n[ERROR]: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
-                sc.nextLine(); // Clear the invalid input
+                sc.nextLine();
             }
         }
     }
 
-    // --- New Sign Up Method ---
     private static void handleSignUp(Scanner sc) {
         System.out.println("\nSign Up As:");
         System.out.println("1. Student");
         System.out.println("2. Professor");
-        System.out.println("(Note: Administrators cannot sign up here)");
+        System.out.println("(Note: Administrators and TAs cannot sign up here)");
         System.out.print("Choose role: ");
-        
+
         int roleChoice = -1;
         try {
             roleChoice = sc.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("Invalid input. Please enter 1 or 2.");
-            sc.nextLine(); // Clear the invalid input
+            sc.nextLine();
             return;
         }
 
@@ -75,7 +77,6 @@ public class Main {
         System.out.print("Enter new Email: ");
         String email = sc.next();
 
-        // Check if user already exists
         for (User u : Database.allUsers) {
             if (u.getEmail().equalsIgnoreCase(email)) {
                 System.out.println("An account with this email already exists!");
@@ -93,26 +94,24 @@ public class Main {
             Database.allUsers.add(new Professor(email, pass));
             System.out.println("Professor account created successfully! You can now log in.");
         }
-        
-        // Save data immediately so credentials are not lost on exception
         Database.saveData();
     }
 
-
-    // --- Refactored Login Method ---
-    private static void handleLogin(Scanner sc) {
+    // Handles InvalidLoginException as per Assignment 2
+    private static void handleLogin(Scanner sc) throws InvalidLoginException {
         System.out.println("\nLogin As:");
         System.out.println("1. Student");
         System.out.println("2. Professor");
         System.out.println("3. Administrator");
+        System.out.println("4. Teaching Assistant");
         System.out.print("Choose role: ");
-        
+
         int roleChoice = -1;
         try {
             roleChoice = sc.nextInt();
         } catch (InputMismatchException e) {
-            System.out.println("Invalid input. Please enter 1, 2, or 3.");
-            sc.nextLine(); // Clear the invalid input
+            System.out.println("Invalid input. Please enter 1, 2, 3, or 4.");
+            sc.nextLine();
             return;
         }
 
@@ -124,24 +123,26 @@ public class Main {
         User loggedInUser = null;
         for (User u : Database.allUsers) {
             if (u.login(email, pass)) {
-                if ((roleChoice == 1 && u instanceof Student) ||
+                // Ensure proper instance checking including the new TA role
+                if ((roleChoice == 1 && u instanceof Student && !(u instanceof TeachingAssistant)) ||
                         (roleChoice == 2 && u instanceof Professor) ||
-                        (roleChoice == 3 && u instanceof Administrator)) {
+                        (roleChoice == 3 && u instanceof Administrator) ||
+                        (roleChoice == 4 && u instanceof TeachingAssistant)) {
                     loggedInUser = u;
                     break;
                 }
             }
         }
 
-        if (loggedInUser != null) {
-            System.out.println("Login Successful!");
-            try {
-                loggedInUser.showDashboard();
-            } catch (Exception e) {
-                System.out.println("An error occurred in dashboard: " + e.getMessage());
-            }
-        } else {
-            System.out.println("Invalid credentials or role selection.");
+        if (loggedInUser == null) {
+            throw new InvalidLoginException("Incorrect email, password, or role selection.");
+        }
+
+        System.out.println("Login Successful!");
+        try {
+            loggedInUser.showDashboard();
+        } catch (Exception e) {
+            System.out.println("An error occurred in dashboard: " + e.getMessage());
         }
     }
 
@@ -156,19 +157,16 @@ public class Main {
 
         Course c1 = new Course("CS101", "Intro to Programming", 4, 30);
         Course c2 = new Course("CS201", "Advanced Programming", 4, 30);
-        Course c3 = new Course("MATH101", "Calculus I", 4, 50);
-        Course c4 = new Course("PHY101", "Physics I", 4, 40);
-        Course c5 = new Course("ENG101", "English Comp", 2, 20);
 
         c2.addPrerequisite(c1);
         p1.assignCourse(c1);
         p1.assignCourse(c2);
-        p2.assignCourse(c3);
 
         Database.courseCatalog.add(c1);
         Database.courseCatalog.add(c2);
-        Database.courseCatalog.add(c3);
-        Database.courseCatalog.add(c4);
-        Database.courseCatalog.add(c5);
+
+        // Pre-create a TA assigned to CS101 for immediate testing
+        TeachingAssistant ta1 = new TeachingAssistant("ta@univ.edu", "pass", c1);
+        Database.allUsers.add(ta1);
     }
 }

@@ -19,6 +19,7 @@ public class Course implements Serializable {
     private String syllabus = "TBA";
     private String location = "TBA";
     private String officeHours = "TBA";
+    private List<Feedback<?>> feedbacks; // Generic feedback list
 
     public Course(String courseCode, String title, int credits, int limit) {
         this.courseCode = courseCode;
@@ -27,6 +28,7 @@ public class Course implements Serializable {
         this.enrollmentLimit = limit;
         this.prerequisites = new ArrayList<>();
         this.enrolledStudents = new ArrayList<>();
+        this.feedbacks = new ArrayList<>();
     }
 
     // Getters
@@ -38,6 +40,7 @@ public class Course implements Serializable {
     public int getEnrollmentLimit() { return enrollmentLimit; }
     public List<Student> getEnrolledStudents() { return enrolledStudents; }
     public String getTimings() { return timings; }
+    public List<Feedback<?>> getFeedbacks() { return feedbacks; }
 
     // Setters
     public void setProfessor(Professor p) { this.professor = p; }
@@ -52,6 +55,7 @@ public class Course implements Serializable {
     public void addPrerequisite(Course c) { this.prerequisites.add(c); }
     public void enrollStudent(Student s) { this.enrolledStudents.add(s); }
     public void removeStudent(Student s) { this.enrolledStudents.remove(s); }
+    public void addFeedback(Feedback<?> feedback) { this.feedbacks.add(feedback); }
 
     public void displayDetails() {
         System.out.println(courseCode + " - " + title + " (" + credits + " Credits)");
