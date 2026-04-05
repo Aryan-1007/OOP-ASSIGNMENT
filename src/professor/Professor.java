@@ -5,6 +5,8 @@ import core.CourseManager;
 import models.Course;
 import models.Feedback;
 import student.Student;
+import student.TeachingAssistant;
+import utils.Database;
 import java.util.*;
 
 public class Professor extends User implements CourseManager {
@@ -77,6 +79,44 @@ public class Professor extends User implements CourseManager {
             }
         }
     }
+    
+    public void assignTaToCourse() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Course Code to assign a TA to: ");
+        String courseCode = sc.nextLine();
+
+        Course targetCourse = null;
+        for (Course c : assignedCourses) {
+            if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
+                targetCourse = c;
+                break;
+            }
+        }
+
+        if (targetCourse == null) {
+            System.out.println("You do not teach this course.");
+            return;
+        }
+
+        System.out.print("Enter TA's Email: ");
+        String taEmail = sc.nextLine();
+
+        TeachingAssistant targetTa = null;
+        for (User u : Database.allUsers) {
+            if (u instanceof TeachingAssistant && u.getEmail().equalsIgnoreCase(taEmail)) {
+                targetTa = (TeachingAssistant) u;
+                break;
+            }
+        }
+
+        if (targetTa == null) {
+            System.out.println("No Teaching Assistant found with that email.");
+            return;
+        }
+
+        targetTa.setAssignedCourse(targetCourse);
+        System.out.println("TA " + taEmail + " has been assigned to " + courseCode);
+    }
 
     @Override
     public void showDashboard() {
@@ -87,7 +127,8 @@ public class Professor extends User implements CourseManager {
             System.out.println("2. Update Course Details");
             System.out.println("3. View Enrolled Students");
             System.out.println("4. View Course Feedback");
-            System.out.println("5. Logout");
+            System.out.println("5. Assign TA to Course");
+            System.out.println("6. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
@@ -95,7 +136,8 @@ public class Professor extends User implements CourseManager {
             else if (choice == 2) updateCourseDetails();
             else if (choice == 3) viewEnrolledStudents();
             else if (choice == 4) viewCourseFeedback();
-            else if (choice == 5) { logout(); break; }
+            else if (choice == 5) assignTaToCourse();
+            else if (choice == 6) { logout(); break; }
         }
     }
 }

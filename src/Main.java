@@ -35,7 +35,7 @@ public class Main {
         while (true) {
             System.out.println("\n--- Main Menu ---");
             System.out.println("1. Login");
-            System.out.println("2. Sign Up (New Student/Professor)");
+            System.out.println("2. Sign Up");
             System.out.println("3. Exit");
             System.out.print("Choose option: ");
 
@@ -69,19 +69,20 @@ public class Main {
         System.out.println("\nSign Up As:");
         System.out.println("1. Student");
         System.out.println("2. Professor");
-        System.out.println("(Note: Administrators and TAs cannot sign up here)");
+        System.out.println("3. Teaching Assistant");
+        System.out.println("(Note: Administrators cannot sign up here)");
         System.out.print("Choose role: ");
 
         int roleChoice = -1;
         try {
             roleChoice = sc.nextInt();
         } catch (InputMismatchException e) {
-            System.out.println("Invalid input. Please enter 1 or 2.");
+            System.out.println("Invalid input. Please enter a number.");
             sc.nextLine();
             return;
         }
 
-        if (roleChoice != 1 && roleChoice != 2) {
+        if (roleChoice < 1 || roleChoice > 3) {
             System.out.println("Invalid role selection.");
             return;
         }
@@ -102,9 +103,12 @@ public class Main {
         if (roleChoice == 1) {
             Database.allUsers.add(new Student(email, pass));
             System.out.println("Student account created successfully! You can now log in.");
-        } else {
+        } else if (roleChoice == 2) {
             Database.allUsers.add(new Professor(email, pass));
             System.out.println("Professor account created successfully! You can now log in.");
+        } else {
+            Database.allUsers.add(new TeachingAssistant(email, pass));
+            System.out.println("Teaching Assistant account created successfully! You can now log in.");
         }
         Database.saveData();
     }
