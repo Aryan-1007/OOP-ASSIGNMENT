@@ -57,7 +57,7 @@ public class Main {
                 System.out.println("Invalid input. Please enter a valid number.");
                 sc.nextLine();
             } catch (InvalidLoginException e) {
-                System.out.println("\n[ERROR]: " + e.getMessage());
+                System.out.println("\n[ERROR]:" + e.getMessage());
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
                 sc.nextLine();
