@@ -15,6 +15,18 @@ public class Main {
 
         if (Database.allUsers.isEmpty()) {
             initializeData();
+        } else {
+            // Ensure default admin always exists even if loaded from a pre-existing database
+            boolean adminExists = false;
+            for (User u : Database.allUsers) {
+                if (u instanceof Administrator && u.getEmail().equals("admin")) {
+                    adminExists = true;
+                    break;
+                }
+            }
+            if (!adminExists) {
+                Database.allUsers.add(new Administrator("admin", "admin"));
+            }
         }
 
         Scanner sc = new Scanner(System.in);
@@ -149,24 +161,5 @@ public class Main {
     private static void initializeData() {
         Administrator admin = new Administrator("admin", "admin");
         Database.allUsers.add(admin);
-
-        Professor p1 = new Professor("prof1@univ.edu", "pass");
-        Professor p2 = new Professor("prof2@univ.edu", "pass");
-        Database.allUsers.add(p1);
-        Database.allUsers.add(p2);
-
-        Course c1 = new Course("CS101", "Intro to Programming", 4, 30);
-        Course c2 = new Course("CS201", "Advanced Programming", 4, 30);
-
-        c2.addPrerequisite(c1);
-        p1.assignCourse(c1);
-        p1.assignCourse(c2);
-
-        Database.courseCatalog.add(c1);
-        Database.courseCatalog.add(c2);
-
-        // Pre-create a TA assigned to CS101 for immediate testing
-        TeachingAssistant ta1 = new TeachingAssistant("ta@univ.edu", "pass", c1);
-        Database.allUsers.add(ta1);
     }
 }
