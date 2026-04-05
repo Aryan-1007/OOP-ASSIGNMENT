@@ -4,14 +4,17 @@ import core.User;
 import core.CourseManager;
 import models.Course;
 import models.Complaint;
+import models.Feedback;
 import utils.Database;
+import exceptions.CourseFullException;
+import exceptions.DropDeadlinePassedException;
 import java.util.*;
 
 public class Student extends User implements CourseManager {
     private static final long serialVersionUID = 1L;
     private int currentSemester = 1;
     private List<Course> registeredCourses = new ArrayList<>();
-    private Map<Course, String> completedCourses = new HashMap<>(); // Maps Course to Grade
+    private Map<Course, String> completedCourses = new HashMap<>();
 
     public Student(String email, String password) { super(email, password); }
 
@@ -27,7 +30,7 @@ public class Student extends User implements CourseManager {
         }
     }
 
-    public void registerForCourse() {
+    public void registerForCourse() throws CourseFullException {
         Scanner sc = new Scanner(System.in);
         System.out.print("Select your current semester to view courses (e.g., 1, 2): ");
         int sem = sc.nextInt();
@@ -41,8 +44,10 @@ public class Student extends User implements CourseManager {
         }
 
         if (target == null) { System.out.println("Course not found."); return; }
+
+        // Throws custom exception if full
         if (target.getEnrolledStudents().size() >= target.getEnrollmentLimit()) {
-            System.out.println("Course is full!"); return;
+            throw new CourseFullException("Course " + courseCode + " is already full!");
         }
 
         int currentCredits = registeredCourses.stream().mapToInt(Course::getCredits).sum();
@@ -61,10 +66,15 @@ public class Student extends User implements CourseManager {
         System.out.println("Successfully registered for " + target.getCourseCode());
     }
 
-    public void dropCourse() {
+    public void dropCourse() throws DropDeadlinePassedException {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Course Code to drop: ");
         String code = sc.next();
+
+        System.out.print("Simulate: Has the drop deadline passed? (y/n): ");
+        if (sc.next().equalsIgnoreCase("y")) {
+            throw new DropDeadlinePassedException("The deadline to drop " + code + " has already passed.");
+        }
 
         Course toDrop = null;
         for (Course c : registeredCourses) {
@@ -106,12 +116,53 @@ public class Student extends User implements CourseManager {
         System.out.println("Current CGPA: " + (totalPoints / totalCredits));
     }
 
+    public void submitFeedback() {
+        if (completedCourses.isEmpty()) {
+            System.out.println("You must complete a course before giving feedback.");
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\n--- Submit Course Feedback ---");
+        for (Course c : completedCourses.keySet()) {
+            System.out.println("- " + c.getCourseCode());
+        }
+        System.out.print("Enter Course Code: ");
+        String code = sc.next();
+
+        Course target = null;
+        for (Course c : completedCourses.keySet()) {
+            if (c.getCourseCode().equalsIgnoreCase(code)) target = c;
+        }
+
+        if (target == null) { System.out.println("You have not completed this course."); return; }
+
+        System.out.println("1. Give Numeric Rating (1-5)\n2. Give Text Comment");
+        System.out.print("Choose feedback type: ");
+        int type = sc.nextInt();
+        sc.nextLine(); // consume
+
+        if (type == 1) {
+            System.out.print("Enter rating (1-5): ");
+            int rating = sc.nextInt();
+            Feedback<Integer> intFeedback = new Feedback<>(this, rating);
+            target.addFeedback(intFeedback);
+            System.out.println("Numeric feedback submitted.");
+        } else {
+            System.out.print("Enter textual comment: ");
+            String comment = sc.nextLine();
+            Feedback<String> stringFeedback = new Feedback<>(this, comment);
+            target.addFeedback(stringFeedback);
+            System.out.println("Textual feedback submitted.");
+        }
+    }
+
     public void manageComplaints() {
         Scanner sc = new Scanner(System.in);
         System.out.println("\n1. Submit a new complaint\n2. View my complaint statuses");
         System.out.print("Choose option: ");
         int choice = sc.nextInt();
-        sc.nextLine(); // consume newline
+        sc.nextLine();
 
         if (choice == 1) {
             System.out.print("Enter complaint description: ");
@@ -122,7 +173,6 @@ public class Student extends User implements CourseManager {
             System.out.println("\n--- My Complaints ---");
             boolean found = false;
             for (Complaint c : Database.allComplaints) {
-                // Simplified check to show complaints for demonstration
                 c.displayComplaint();
                 found = true;
             }
@@ -139,19 +189,25 @@ public class Student extends User implements CourseManager {
             System.out.println("2. Register for Course");
             System.out.println("3. Drop a Course");
             System.out.println("4. View Schedule");
-            System.out.println("5. Track Academic Progress (Grades & GPA)");
-            System.out.println("6. Complaints");
-            System.out.println("7. Logout");
+            System.out.println("5. Track Academic Progress");
+            System.out.println("6. Submit Course Feedback");
+            System.out.println("7. Complaints");
+            System.out.println("8. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
-            if (choice == 1) viewCourses();
-            else if (choice == 2) registerForCourse();
-            else if (choice == 3) dropCourse();
-            else if (choice == 4) viewSchedule();
-            else if (choice == 5) trackAcademicProgress();
-            else if (choice == 6) manageComplaints();
-            else if (choice == 7) { logout(); break; }
+            try {
+                if (choice == 1) viewCourses();
+                else if (choice == 2) registerForCourse();
+                else if (choice == 3) dropCourse();
+                else if (choice == 4) viewSchedule();
+                else if (choice == 5) trackAcademicProgress();
+                else if (choice == 6) submitFeedback();
+                else if (choice == 7) manageComplaints();
+                else if (choice == 8) { logout(); break; }
+            } catch (CourseFullException | DropDeadlinePassedException e) {
+                System.out.println("\n[ERROR]: " + e.getMessage());
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import core.User;
 import core.CourseManager;
 import models.Course;
 import models.Complaint;
+import professor.Professor;
 import student.Student;
 import utils.Database;
 import java.util.*;
@@ -49,6 +50,44 @@ public class Administrator extends User implements CourseManager {
         } else {
             System.out.println("Course not found.");
         }
+    }
+    
+    public void assignProfessorToCourse() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Course Code: ");
+        String courseCode = sc.nextLine();
+        
+        Course targetCourse = null;
+        for (Course c : Database.courseCatalog) {
+            if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
+                targetCourse = c;
+                break;
+            }
+        }
+        
+        if (targetCourse == null) {
+            System.out.println("Course not found in catalog.");
+            return;
+        }
+        
+        System.out.print("Enter Professor Email to assign: ");
+        String profEmail = sc.nextLine();
+        
+        Professor targetProf = null;
+        for (User u : Database.allUsers) {
+            if (u instanceof Professor && u.getEmail().equalsIgnoreCase(profEmail)) {
+                targetProf = (Professor) u;
+                break;
+            }
+        }
+        
+        if (targetProf == null) {
+            System.out.println("Professor not found.");
+            return;
+        }
+        
+        targetProf.assignCourse(targetCourse);
+        System.out.println("Professor " + profEmail + " assigned to course " + courseCode + " successfully.");
     }
 
     public void manageStudentRecords() {
@@ -115,6 +154,38 @@ public class Administrator extends User implements CourseManager {
         }
     }
 
+    public void viewAllUsers() {
+        System.out.println("\n--- User Directory ---");
+        if (Database.allUsers.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+        for (User u : Database.allUsers) {
+            String role = u.getClass().getSimpleName();
+            System.out.println("[" + role + "] " + u.getEmail());
+        }
+    }
+
+    public void deleteUser() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter User Email to delete: ");
+        String email = sc.nextLine();
+        
+        // Prevent admin from deleting themselves
+        if (this.getEmail().equalsIgnoreCase(email)) {
+            System.out.println("You cannot delete your own account.");
+            return;
+        }
+
+        boolean removed = Database.deleteUser(email);
+        if (removed) {
+            Database.saveData(); // Save changes to the database file immediately
+            System.out.println("User deleted successfully.");
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
     @Override
     public void showDashboard() {
         Scanner sc = new Scanner(System.in);
@@ -123,18 +194,25 @@ public class Administrator extends User implements CourseManager {
             System.out.println("1. View Catalog");
             System.out.println("2. Add Course");
             System.out.println("3. Delete Course");
-            System.out.println("4. Manage Student Records (Assign Grades)");
-            System.out.println("5. Handle Complaints (Filter & Resolve)");
-            System.out.println("6. Logout");
+            System.out.println("4. Assign Professor to Course");
+            System.out.println("5. Manage Student Records (Assign Grades)");
+            System.out.println("6. Handle Complaints (Filter & Resolve)");
+            System.out.println("7. View All Users");
+            System.out.println("8. Delete User");
+            System.out.println("9. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
             if (choice == 1) viewCourses();
             else if (choice == 2) addCourse();
             else if (choice == 3) deleteCourse();
-            else if (choice == 4) manageStudentRecords();
-            else if (choice == 5) handleComplaints();
-            else if (choice == 6) { logout(); break; }
+            else if (choice == 4) assignProfessorToCourse();
+            else if (choice == 5) manageStudentRecords();
+            else if (choice == 6) handleComplaints();
+            else if (choice == 7) viewAllUsers();
+            else if (choice == 8) deleteUser();
+            else if (choice == 9) { logout(); break; }
+            else System.out.println("Invalid choice.");
         }
     }
 }
