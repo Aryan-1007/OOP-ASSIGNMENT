@@ -115,6 +115,18 @@ public class Administrator extends User implements CourseManager {
         }
     }
 
+    public void viewAllUsers() {
+        System.out.println("\n--- User Directory ---");
+        if (Database.allUsers.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+        for (User u : Database.allUsers) {
+            String role = u.getClass().getSimpleName();
+            System.out.println("[" + role + "] " + u.getEmail());
+        }
+    }
+
     public void deleteUser() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter User Email to delete: ");
@@ -145,8 +157,9 @@ public class Administrator extends User implements CourseManager {
             System.out.println("3. Delete Course");
             System.out.println("4. Manage Student Records (Assign Grades)");
             System.out.println("5. Handle Complaints (Filter & Resolve)");
-            System.out.println("6. Delete User");
-            System.out.println("7. Logout");
+            System.out.println("6. View All Users");
+            System.out.println("7. Delete User");
+            System.out.println("8. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
@@ -155,8 +168,9 @@ public class Administrator extends User implements CourseManager {
             else if (choice == 3) deleteCourse();
             else if (choice == 4) manageStudentRecords();
             else if (choice == 5) handleComplaints();
-            else if (choice == 6) deleteUser();
-            else if (choice == 7) { logout(); break; }
+            else if (choice == 6) viewAllUsers();
+            else if (choice == 7) deleteUser();
+            else if (choice == 8) { logout(); break; }
             else System.out.println("Invalid choice.");
         }
     }
