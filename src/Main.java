@@ -34,7 +34,7 @@ public class Main {
 
 
         while (true) {
-            System.out.println("\n--- Main Menu ---");
+            System.out.println("\n-- Main Menu --");
             System.out.println("1. Login");
             System.out.println("2. Sign Up");
             System.out.println("3. Exit");
@@ -52,7 +52,7 @@ public class Main {
                 } else if (initialChoice == 1) {
                     handleLogin(sc);
                 } else {
-                    System.out.println("Invalid choice. Please try again.");
+                    System.out.println("Invalid choice.Please try again.");
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
