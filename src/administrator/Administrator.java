@@ -35,8 +35,10 @@ public class Administrator extends User implements CourseManager {
         int credits = sc.nextInt();
         System.out.print("Enter Enrollment Limit: ");
         int limit = sc.nextInt();
+        System.out.print("Enter Semester: ");
+        int semester = sc.nextInt();
 
-        Database.courseCatalog.add(new Course(code, title, credits, limit));
+        Database.courseCatalog.add(new Course(code, title, credits, limit, semester));
         System.out.println("Course Added successfully.");
     }
 

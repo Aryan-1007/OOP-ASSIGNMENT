@@ -32,18 +32,29 @@ public class Student extends User implements CourseManager {
 
     public void registerForCourse() throws CourseFullException {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Select your current semester to view courses (e.g., 1, 2): ");
+        System.out.print("Select semester to view courses (e.g., 1, 2): ");
         int sem = sc.nextInt();
+
+        System.out.println("\n--- Courses for Semester " + sem + " ---");
+        for (Course c : Database.courseCatalog) {
+            if (c.getSemester() == sem) {
+                c.displayDetails();
+                System.out.println("-");
+            }
+        }
 
         System.out.print("Enter Course Code to register (e.g., CS101): ");
         String courseCode = sc.next();
 
         Course target = null;
         for (Course c : Database.courseCatalog) {
-            if (c.getCourseCode().equalsIgnoreCase(courseCode)) { target = c; break; }
+            if (c.getCourseCode().equalsIgnoreCase(courseCode) && c.getSemester() == sem) {
+                target = c;
+                break;
+            }
         }
 
-        if (target == null) { System.out.println("Course not found."); return; }
+        if (target == null) { System.out.println("Course not found in this semester."); return; }
 
         // Throws custom exception if full
         if (target.getEnrolledStudents().size() >= target.getEnrollmentLimit()) {

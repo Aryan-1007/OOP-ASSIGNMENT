@@ -20,8 +20,9 @@ public class Course implements Serializable {
     private String location = "TBA";
     private String officeHours = "TBA";
     private List<Feedback<?>> feedbacks; // Generic feedback list
+    private int semester;
 
-    public Course(String courseCode, String title, int credits, int limit) {
+    public Course(String courseCode, String title, int credits, int limit, int semester) {
         this.courseCode = courseCode;
         this.title = title;
         this.credits = credits;
@@ -29,6 +30,7 @@ public class Course implements Serializable {
         this.prerequisites = new ArrayList<>();
         this.enrolledStudents = new ArrayList<>();
         this.feedbacks = new ArrayList<>();
+        this.semester = semester;
     }
 
     // Getters
@@ -41,6 +43,7 @@ public class Course implements Serializable {
     public List<Student> getEnrolledStudents() { return enrolledStudents; }
     public String getTimings() { return timings; }
     public List<Feedback<?>> getFeedbacks() { return feedbacks; }
+    public int getSemester() { return semester; }
 
     // Setters
     public void setProfessor(Professor p) { this.professor = p; }
@@ -50,6 +53,7 @@ public class Course implements Serializable {
     public void setOfficeHours(String hours) { this.officeHours = hours; }
     public void setLocation(String location) { this.location = location; }
     public void setSyllabus(String syllabus) { this.syllabus = syllabus; }
+    public void setSemester(int semester) { this.semester = semester; }
 
     // Core Functions
     public void addPrerequisite(Course c) { this.prerequisites.add(c); }
@@ -58,7 +62,7 @@ public class Course implements Serializable {
     public void addFeedback(Feedback<?> feedback) { this.feedbacks.add(feedback); }
 
     public void displayDetails() {
-        System.out.println(courseCode + " - " + title + " (" + credits + " Credits)");
+        System.out.println(courseCode + " - " + title + " (" + credits + " Credits) - Semester: " + semester);
         System.out.println("Timings: " + (timings != null ? timings : "TBA") + " | Location: " + location);
         System.out.println("Professor: " + (professor != null ? professor.getEmail() : "TBA") + " | Office Hours: " + officeHours);
         System.out.println("Enrolled: " + enrolledStudents.size() + "/" + enrollmentLimit);
