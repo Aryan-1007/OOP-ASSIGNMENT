@@ -32,6 +32,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome to the University Course Registration System");
 
+
         while (true) {
             System.out.println("\n--- Main Menu ---");
             System.out.println("1. Login");
