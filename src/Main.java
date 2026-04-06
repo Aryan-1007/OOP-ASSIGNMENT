@@ -58,7 +58,7 @@ public class Main {
                 System.out.println("Invalid input. Please enter a valid number.");
                 sc.nextLine();
             } catch (InvalidLoginException e) {
-                System.out.println("\n[ERROR]:" + e.getMessage());
+                System.out.println("\n[ERROR]: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
                 sc.nextLine();
@@ -127,9 +127,12 @@ public class Main {
         try {
             roleChoice = sc.nextInt();
         } catch (InputMismatchException e) {
-            System.out.println("Invalid input. Please enter 1, 2, 3, or 4.");
-            sc.nextLine();
-            return;
+            sc.nextLine(); // Clear the invalid input before throwing
+            throw new InvalidLoginException("Invalid input. Please enter a number (1-4).");
+        }
+
+        if (roleChoice < 1 || roleChoice > 4) {
+            throw new InvalidLoginException("Invalid role selection. Please choose a number between 1 and 4.");
         }
 
         System.out.print("Email: ");
