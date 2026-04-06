@@ -80,7 +80,7 @@ public class Professor extends User implements CourseManager {
         }
     }
     
-    public void assignGrade() {
+    public void markCourseAsCompleted() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Course Code: ");
         String courseCode = sc.nextLine();
@@ -114,11 +114,11 @@ public class Professor extends User implements CourseManager {
             return;
         }
 
-        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+        System.out.print("Enter Final Grade (4-10 for pass, 0 for fail): ");
         int grade = sc.nextInt();
 
-        targetStudent.assignGrade(targetCourse, grade);
-        System.out.println("Grade assigned successfully for " + email);
+        targetStudent.markCourseCompleted(targetCourse, grade);
+        System.out.println("Course marked as completed for " + email);
     }
 
     public void assignTaToCourse() {
@@ -169,7 +169,7 @@ public class Professor extends User implements CourseManager {
             System.out.println("3. View Enrolled Students");
             System.out.println("4. View Course Feedback");
             System.out.println("5. Assign TA to Course");
-            System.out.println("6. Assign Grade");
+            System.out.println("6. Mark Course as Completed for Student");
             System.out.println("7. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
@@ -179,7 +179,7 @@ public class Professor extends User implements CourseManager {
             else if (choice == 3) viewEnrolledStudents();
             else if (choice == 4) viewCourseFeedback();
             else if (choice == 5) assignTaToCourse();
-            else if (choice == 6) assignGrade();
+            else if (choice == 6) markCourseAsCompleted();
             else if (choice == 7) { logout(); break; }
         }
     }

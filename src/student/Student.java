@@ -21,6 +21,14 @@ public class Student extends User implements CourseManager {
     public void assignGrade(Course c, int grade) { completedCourses.put(c, grade); }
     public Map<Course, Integer> getCompletedCourses() { return completedCourses; }
 
+    public void markCourseCompleted(Course course, int grade) {
+        if (registeredCourses.contains(course)) {
+            registeredCourses.remove(course);
+            course.removeStudent(this);
+            completedCourses.put(course, grade);
+        }
+    }
+
     @Override
     public void viewCourses() {
         System.out.println("\n--- Available Courses ---");

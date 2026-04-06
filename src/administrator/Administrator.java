@@ -37,8 +37,31 @@ public class Administrator extends User implements CourseManager {
         int limit = sc.nextInt();
         System.out.print("Enter Semester: ");
         int semester = sc.nextInt();
+        sc.nextLine(); // consume newline
 
-        Database.courseCatalog.add(new Course(code, title, credits, limit, semester));
+        Course newCourse = new Course(code, title, credits, limit, semester);
+
+        System.out.print("Does this course have prerequisites? (y/n): ");
+        if (sc.next().equalsIgnoreCase("y")) {
+            sc.nextLine(); // consume newline
+            System.out.print("Enter prerequisite course codes (comma-separated): ");
+            String[] prereqCodes = sc.nextLine().split(",");
+            for (String prereqCode : prereqCodes) {
+                boolean found = false;
+                for (Course c : Database.courseCatalog) {
+                    if (c.getCourseCode().equalsIgnoreCase(prereqCode.trim())) {
+                        newCourse.addPrerequisite(c);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    System.out.println("Warning: Prerequisite course '" + prereqCode.trim() + "' not found in catalog.");
+                }
+            }
+        }
+
+        Database.courseCatalog.add(newCourse);
         System.out.println("Course Added successfully.");
     }
 
@@ -94,27 +117,31 @@ public class Administrator extends User implements CourseManager {
 
     public void manageStudentRecords() {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Student Email to assign grade: ");
+        System.out.print("Enter Student Email to mark course complete: ");
         String email = sc.next();
 
         Student target = null;
         for (core.User u : Database.allUsers) {
             if (u instanceof Student && u.getEmail().equalsIgnoreCase(email)) {
-                target = (Student) u; break;
+                target = (Student) u;
+                break;
             }
         }
 
-        if (target == null) { System.out.println("Student not found."); return; }
+        if (target == null) {
+            System.out.println("Student not found.");
+            return;
+        }
 
         System.out.print("Enter Course Code: ");
         String code = sc.next();
-        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+        System.out.print("Enter Final Grade (4-10 for pass, 0 for fail): ");
         int grade = sc.nextInt();
 
         for (Course c : Database.courseCatalog) {
             if (c.getCourseCode().equalsIgnoreCase(code)) {
-                target.assignGrade(c, grade);
-                System.out.println("Grade assigned. Semester data updated for " + email);
+                target.markCourseCompleted(c, grade);
+                System.out.println("Course marked as completed for " + email);
                 return;
             }
         }
@@ -220,7 +247,7 @@ public class Administrator extends User implements CourseManager {
             System.out.println("2. Add Course");
             System.out.println("3. Delete Course");
             System.out.println("4. Assign Professor to Course");
-            System.out.println("5. Manage Student Records (Assign Grades)");
+            System.out.println("5. Mark Course as Completed for Student");
             System.out.println("6. Handle Complaints (Filter & Resolve)");
             System.out.println("7. View All Users");
             System.out.println("8. Delete User");
