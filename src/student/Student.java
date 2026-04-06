@@ -14,12 +14,12 @@ public class Student extends User implements CourseManager {
     private static final long serialVersionUID = 1L;
     private int currentSemester = 1;
     private List<Course> registeredCourses = new ArrayList<>();
-    private Map<Course, String> completedCourses = new HashMap<>();
+    private Map<Course, Integer> completedCourses = new HashMap<>();
 
     public Student(String email, String password) { super(email, password); }
 
-    public void assignGrade(Course c, String grade) { completedCourses.put(c, grade); }
-    public Map<Course, String> getCompletedCourses() { return completedCourses; }
+    public void assignGrade(Course c, int grade) { completedCourses.put(c, grade); }
+    public Map<Course, Integer> getCompletedCourses() { return completedCourses; }
 
     @Override
     public void viewCourses() {
@@ -107,9 +107,9 @@ public class Student extends User implements CourseManager {
 
         double totalPoints = 0;
         int totalCredits = 0;
-        for (Map.Entry<Course, String> entry : completedCourses.entrySet()) {
+        for (Map.Entry<Course, Integer> entry : completedCourses.entrySet()) {
             System.out.println(entry.getKey().getCourseCode() + ": Grade " + entry.getValue());
-            int gradePoint = entry.getValue().equalsIgnoreCase("A") ? 10 : (entry.getValue().equalsIgnoreCase("B") ? 8 : 6);
+            int gradePoint = entry.getValue();
             totalPoints += (gradePoint * entry.getKey().getCredits());
             totalCredits += entry.getKey().getCredits();
         }

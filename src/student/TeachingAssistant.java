@@ -52,8 +52,8 @@ public class TeachingAssistant extends Student {
             return;
         }
 
-        System.out.print("Enter Grade (A/B/C): ");
-        String grade = sc.nextLine();
+        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+        int grade = sc.nextInt();
 
         targetStudent.assignGrade(assignedCourse, grade);
         System.out.println("Grade assigned successfully for " + email);

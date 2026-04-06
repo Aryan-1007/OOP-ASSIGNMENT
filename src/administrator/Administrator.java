@@ -106,8 +106,8 @@ public class Administrator extends User implements CourseManager {
 
         System.out.print("Enter Course Code: ");
         String code = sc.next();
-        System.out.print("Enter Grade (A/B/C): ");
-        String grade = sc.next();
+        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+        int grade = sc.nextInt();
 
         for (Course c : Database.courseCatalog) {
             if (c.getCourseCode().equalsIgnoreCase(code)) {
@@ -177,10 +177,33 @@ public class Administrator extends User implements CourseManager {
             return;
         }
 
+        // Find the user first
+        User userToDelete = null;
+        for (User u : Database.allUsers) {
+            if (u.getEmail().equalsIgnoreCase(email)) {
+                userToDelete = u;
+                break;
+            }
+        }
+
+        if (userToDelete == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // If the user is a student, un-enroll them from all courses
+        if (userToDelete instanceof Student) {
+            Student student = (Student) userToDelete;
+            for (Course c : Database.courseCatalog) {
+                c.removeStudent(student);
+            }
+        }
+
+        // Now, delete the user from the main user list
         boolean removed = Database.deleteUser(email);
         if (removed) {
             Database.saveData(); // Save changes to the database file immediately
-            System.out.println("User deleted successfully.");
+            System.out.println("User deleted successfully and unenrolled from all courses.");
         } else {
             System.out.println("User not found.");
         }

@@ -80,6 +80,47 @@ public class Professor extends User implements CourseManager {
         }
     }
     
+    public void assignGrade() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter Course Code: ");
+        String courseCode = sc.nextLine();
+
+        Course targetCourse = null;
+        for (Course c : assignedCourses) {
+            if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
+                targetCourse = c;
+                break;
+            }
+        }
+
+        if (targetCourse == null) {
+            System.out.println("You do not teach this course.");
+            return;
+        }
+
+        System.out.print("Enter Student's Email: ");
+        String email = sc.nextLine();
+
+        Student targetStudent = null;
+        for (Student s : targetCourse.getEnrolledStudents()) {
+            if (s.getEmail().equalsIgnoreCase(email)) {
+                targetStudent = s;
+                break;
+            }
+        }
+
+        if (targetStudent == null) {
+            System.out.println("Student not enrolled in this course.");
+            return;
+        }
+
+        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+        int grade = sc.nextInt();
+
+        targetStudent.assignGrade(targetCourse, grade);
+        System.out.println("Grade assigned successfully for " + email);
+    }
+
     public void assignTaToCourse() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Course Code to assign a TA to: ");
@@ -128,7 +169,8 @@ public class Professor extends User implements CourseManager {
             System.out.println("3. View Enrolled Students");
             System.out.println("4. View Course Feedback");
             System.out.println("5. Assign TA to Course");
-            System.out.println("6. Logout");
+            System.out.println("6. Assign Grade");
+            System.out.println("7. Logout");
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
@@ -137,7 +179,8 @@ public class Professor extends User implements CourseManager {
             else if (choice == 3) viewEnrolledStudents();
             else if (choice == 4) viewCourseFeedback();
             else if (choice == 5) assignTaToCourse();
-            else if (choice == 6) { logout(); break; }
+            else if (choice == 6) assignGrade();
+            else if (choice == 7) { logout(); break; }
         }
     }
 }
