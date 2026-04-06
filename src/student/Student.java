@@ -18,16 +18,14 @@ public class Student extends User implements CourseManager {
 
     public Student(String email, String password) { super(email, password); }
 
-    public void assignGrade(Course c, int grade) { completedCourses.put(c, grade); }
-    public Map<Course, Integer> getCompletedCourses() { return completedCourses; }
-
-    public void markCourseCompleted(Course course, int grade) {
-        if (registeredCourses.contains(course)) {
-            registeredCourses.remove(course);
-            course.removeStudent(this);
-            completedCourses.put(course, grade);
+    public void assignGrade(Course c, int grade) {
+        if (registeredCourses.contains(c)) {
+            registeredCourses.remove(c);
+            c.removeStudent(this);
         }
+        completedCourses.put(c, grade);
     }
+    public Map<Course, Integer> getCompletedCourses() { return completedCourses; }
 
     @Override
     public void viewCourses() {
@@ -75,8 +73,9 @@ public class Student extends User implements CourseManager {
         }
 
         for (Course prereq : target.getPrerequisites()) {
-            if (!completedCourses.containsKey(prereq)) {
-                System.out.println("Prerequisite missing: " + prereq.getCourseCode()); return;
+            if (!completedCourses.containsKey(prereq) || completedCourses.get(prereq) == 0) {
+                System.out.println("Prerequisite not met: " + prereq.getCourseCode() + " must be completed with a passing grade.");
+                return;
             }
         }
 
