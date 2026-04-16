@@ -74,7 +74,7 @@ public class Main {
         System.out.println("(Note: Administrators cannot sign up here)");
         System.out.print("Choose role: ");
 
-        int roleChoice = -1;
+        int roleChoice;
         try {
             roleChoice = sc.nextInt();
         } catch (InputMismatchException e) {

@@ -62,9 +62,13 @@ public class Course implements Serializable {
     public void addFeedback(Feedback<?> feedback) { this.feedbacks.add(feedback); }
 
     public void displayDetails() {
-        System.out.println(courseCode + " - " + title + " (" + credits + " Credits) - Semester: " + semester);
-        System.out.println("Timings: " + (timings != null ? timings : "TBA") + " | Location: " + location);
-        System.out.println("Professor: " + (professor != null ? professor.getEmail() : "TBA") + " | Office Hours: " + officeHours);
-        System.out.println("Enrolled: " + enrolledStudents.size() + "/" + enrollmentLimit);
+        System.out.println(getCourseDetailsAsString());
+    }
+
+    public String getCourseDetailsAsString() {
+        return courseCode + " - " + title + " (" + credits + " Credits) - Semester: " + semester + "\n" +
+               "Timings: " + (timings != null ? timings : "TBA") + " | Location: " + location + "\n" +
+               "Professor: " + (professor != null ? professor.getEmail() : "TBA") + " | Office Hours: " + officeHours + "\n" +
+               "Enrolled: " + enrolledStudents.size() + "/" + enrollmentLimit;
     }
 }

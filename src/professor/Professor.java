@@ -22,69 +22,87 @@ public class Professor extends User implements CourseManager {
         c.setProfessor(this);
     }
 
+    public List<Course> getAssignedCourses() {
+        return assignedCourses;
+    }
+
     @Override
     public void viewCourses() {
-        System.out.println("\n--- My Assigned Courses ---");
-        if(assignedCourses.isEmpty()) System.out.println("No courses assigned yet.");
-        for (Course c : assignedCourses) {
-            c.displayDetails();
-            System.out.println("-");
-        }
+        System.out.println(getMyCoursesAsString());
     }
 
-    public void updateCourseDetails() {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Course Code to update: ");
-        String code = sc.next();
+    public String getMyCoursesAsString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n--- My Assigned Courses ---\n");
+        if(assignedCourses.isEmpty()) {
+            sb.append("No courses assigned yet.\n");
+        } else {
+            for (Course c : assignedCourses) {
+                sb.append(c.getCourseDetailsAsString()).append("\n-\n");
+            }
+        }
+        return sb.toString();
+    }
 
+    public void updateCourseDetails(String courseCode, int opt, String newValue) {
         Course target = null;
         for (Course c : assignedCourses) {
-            if (c.getCourseCode().equalsIgnoreCase(code)) target = c;
-        }
-
-        if (target == null) { System.out.println("You do not teach this course."); return; }
-
-        System.out.println("1. Update Syllabus\n2. Update Timings\n3. Update Enrollment Limit\n4. Update Office Hours");
-        System.out.print("Choose option: ");
-        int opt = sc.nextInt();
-        sc.nextLine();
-
-        if (opt == 1) { System.out.print("New Syllabus: "); target.setSyllabus(sc.nextLine()); }
-        if (opt == 2) { System.out.print("New Timings: "); target.setTimings(sc.nextLine()); }
-        if (opt == 3) { System.out.print("New Limit: "); target.setEnrollmentLimit(sc.nextInt()); }
-        if (opt == 4) { System.out.print("New Office Hours: "); target.setOfficeHours(sc.nextLine()); }
-        System.out.println("Course updated successfully.");
-    }
-
-    public void viewEnrolledStudents() {
-        if(assignedCourses.isEmpty()) System.out.println("No courses assigned yet.");
-        for (Course c : assignedCourses) {
-            System.out.println("\nStudents in " + c.getCourseCode() + ":");
-            if(c.getEnrolledStudents().isEmpty()) System.out.println("No students enrolled.");
-            for (Student s : c.getEnrolledStudents()) {
-                System.out.println("- " + s.getEmail() + " | Completed Courses: " + s.getCompletedCourses().size());
+            if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
+                target = c;
+                break;
             }
         }
+
+        if (target == null) {
+            throw new IllegalArgumentException("You do not teach this course or course not found.");
+        }
+
+        switch (opt) {
+            case 1: target.setSyllabus(newValue); break;
+            case 2: target.setTimings(newValue); break;
+            case 3: target.setEnrollmentLimit(Integer.parseInt(newValue)); break;
+            case 4: target.setOfficeHours(newValue); break;
+            default: throw new IllegalArgumentException("Invalid update option.");
+        }
+        Database.saveData();
     }
 
-    public void viewCourseFeedback() {
-        System.out.println("\n--- Course Feedback ---");
+    public String getEnrolledStudentsAsString() {
+        StringBuilder sb = new StringBuilder();
+        if(assignedCourses.isEmpty()) {
+            sb.append("No courses assigned yet.\n");
+        } else {
+            for (Course c : assignedCourses) {
+                sb.append("\nStudents in ").append(c.getCourseCode()).append(":\n");
+                if(c.getEnrolledStudents().isEmpty()) {
+                    sb.append("No students enrolled.\n");
+                } else {
+                    for (Student s : c.getEnrolledStudents()) {
+                        sb.append("- ").append(s.getEmail()).append(" | Completed Courses: ").append(s.getCompletedCourses().size()).append("\n");
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public String getCourseFeedbackAsString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n--- Course Feedback ---\n");
         for (Course c : assignedCourses) {
-            System.out.println("Feedback for " + c.getCourseCode() + ":");
+            sb.append("Feedback for ").append(c.getCourseCode()).append(":\n");
             if (c.getFeedbacks().isEmpty()) {
-                System.out.println("  No feedback yet.");
-            }
-            for (Feedback<?> f : c.getFeedbacks()) {
-                System.out.println("  - " + f.getStudent().getEmail() + " rated: " + f.getFeedbackData().toString());
+                sb.append("  No feedback yet.\n");
+            } else {
+                for (Feedback<?> f : c.getFeedbacks()) {
+                    sb.append("  - ").append(f.getStudent().getEmail()).append(" rated: ").append(f.getFeedbackData().toString()).append("\n");
+                }
             }
         }
+        return sb.toString();
     }
     
-    public void assignGrade() {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Course Code: ");
-        String courseCode = sc.nextLine();
-
+    public void assignGrade(String courseCode, String studentEmail, int grade) {
         Course targetCourse = null;
         for (Course c : assignedCourses) {
             if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
@@ -94,38 +112,26 @@ public class Professor extends User implements CourseManager {
         }
 
         if (targetCourse == null) {
-            System.out.println("You do not teach this course.");
-            return;
+            throw new IllegalArgumentException("You do not teach this course.");
         }
-
-        System.out.print("Enter Student's Email: ");
-        String email = sc.nextLine();
 
         Student targetStudent = null;
         for (Student s : targetCourse.getEnrolledStudents()) {
-            if (s.getEmail().equalsIgnoreCase(email)) {
+            if (s.getEmail().equalsIgnoreCase(studentEmail)) {
                 targetStudent = s;
                 break;
             }
         }
 
         if (targetStudent == null) {
-            System.out.println("Student not enrolled in this course.");
-            return;
+            throw new IllegalArgumentException("Student not enrolled in this course.");
         }
 
-        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
-        int grade = sc.nextInt();
-
         targetStudent.assignGrade(targetCourse, grade);
-        System.out.println("Grade assigned successfully for " + email);
+        Database.saveData();
     }
 
-    public void assignTaToCourse() {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Course Code to assign a TA to: ");
-        String courseCode = sc.nextLine();
-
+    public void assignTaToCourse(String courseCode, String taEmail) {
         Course targetCourse = null;
         for (Course c : assignedCourses) {
             if (c.getCourseCode().equalsIgnoreCase(courseCode)) {
@@ -135,12 +141,8 @@ public class Professor extends User implements CourseManager {
         }
 
         if (targetCourse == null) {
-            System.out.println("You do not teach this course.");
-            return;
+            throw new IllegalArgumentException("You do not teach this course.");
         }
-
-        System.out.print("Enter TA's Email: ");
-        String taEmail = sc.nextLine();
 
         TeachingAssistant targetTa = null;
         for (User u : Database.allUsers) {
@@ -151,16 +153,16 @@ public class Professor extends User implements CourseManager {
         }
 
         if (targetTa == null) {
-            System.out.println("No Teaching Assistant found with that email.");
-            return;
+            throw new IllegalArgumentException("No Teaching Assistant found with that email.");
         }
 
         targetTa.setAssignedCourse(targetCourse);
-        System.out.println("TA " + taEmail + " has been assigned to " + courseCode);
+        Database.saveData();
     }
 
     @Override
     public void showDashboard() {
+        // Console implementation - kept for compatibility if needed, but GUI uses separate methods
         Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.println("\n=== Professor Menu ===");
@@ -174,13 +176,44 @@ public class Professor extends User implements CourseManager {
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
-            if (choice == 1) viewCourses();
-            else if (choice == 2) updateCourseDetails();
-            else if (choice == 3) viewEnrolledStudents();
-            else if (choice == 4) viewCourseFeedback();
-            else if (choice == 5) assignTaToCourse();
-            else if (choice == 6) assignGrade();
-            else if (choice == 7) { logout(); break; }
+            try {
+                if (choice == 1) System.out.println(getMyCoursesAsString());
+                else if (choice == 2) {
+                    System.out.print("Enter Course Code to update: ");
+                    String code = sc.next();
+                    System.out.println("1. Update Syllabus\n2. Update Timings\n3. Update Enrollment Limit\n4. Update Office Hours");
+                    System.out.print("Choose option: ");
+                    int opt = sc.nextInt();
+                    sc.nextLine(); // consume newline
+                    System.out.print("Enter new value: ");
+                    String newValue = sc.nextLine();
+                    updateCourseDetails(code, opt, newValue);
+                    System.out.println("Course updated successfully.");
+                }
+                else if (choice == 3) System.out.println(getEnrolledStudentsAsString());
+                else if (choice == 4) System.out.println(getCourseFeedbackAsString());
+                else if (choice == 5) {
+                    System.out.print("Enter Course Code to assign a TA to: ");
+                    String courseCode = sc.next();
+                    System.out.print("Enter TA's Email: ");
+                    String taEmail = sc.next();
+                    assignTaToCourse(courseCode, taEmail);
+                    System.out.println("TA assigned successfully.");
+                }
+                else if (choice == 6) {
+                    System.out.print("Enter Course Code: ");
+                    String courseCode = sc.next();
+                    System.out.print("Enter Student's Email: ");
+                    String studentEmail = sc.next();
+                    System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+                    int grade = sc.nextInt();
+                    assignGrade(courseCode, studentEmail, grade);
+                    System.out.println("Grade assigned successfully.");
+                }
+                else if (choice == 7) { logout(); break; }
+            } catch (Exception e) {
+                System.out.println("\n[ERROR]: " + e.getMessage());
+            }
         }
     }
 }

@@ -1,19 +1,21 @@
 package student;
 
 import models.Course;
+import utils.Database;
+
+import java.io.Serial;
 import java.util.Scanner;
 
 public class TeachingAssistant extends Student {
+    @Serial
     private static final long serialVersionUID = 1L;
     private Course assignedCourse;
 
-    // Constructor for when a TA is created without an immediate assignment
     public TeachingAssistant(String email, String password) {
         super(email, password);
-        this.assignedCourse = null; // Explicitly null
+        this.assignedCourse = null;
     }
 
-    // Existing constructor for pre-populating data
     public TeachingAssistant(String email, String password, Course assignedCourse) {
         super(email, password);
         this.assignedCourse = assignedCourse;
@@ -27,55 +29,46 @@ public class TeachingAssistant extends Student {
         this.assignedCourse = assignedCourse;
     }
 
-    public void assignGrade() {
+    public void assignGrade(String studentEmail, int grade) {
         if (assignedCourse == null) {
-            System.out.println("You are not assigned to a course.");
-            return;
+            throw new IllegalStateException("You are not assigned to a course.");
         }
 
-        Scanner sc = new Scanner(System.in);
-        System.out.println("--- Assign Grade for " + assignedCourse.getCourseCode() + " ---");
-        System.out.print("Enter Student Email: ");
-        String email = sc.nextLine();
-
         Student targetStudent = null;
-        // Find the student only within the enrolled students of the assigned course
         for (Student s : assignedCourse.getEnrolledStudents()) {
-            if (s.getEmail().equalsIgnoreCase(email)) {
+            if (s.getEmail().equalsIgnoreCase(studentEmail)) {
                 targetStudent = s;
                 break;
             }
         }
 
         if (targetStudent == null) {
-            System.out.println("Student not found or not enrolled in this course.");
-            return;
+            throw new IllegalArgumentException("Student not found or not enrolled in this course.");
         }
-
-        System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
-        int grade = sc.nextInt();
 
         targetStudent.assignGrade(assignedCourse, grade);
-        System.out.println("Grade assigned successfully for " + email);
+        Database.saveData();
     }
-    
-    public void viewEnrolledStudents() {
+
+    public String getEnrolledStudentsAsString() {
         if (assignedCourse == null) {
-            System.out.println("You are not assigned to a course.");
-            return;
+            return "You are not assigned to a course.";
         }
-        System.out.println("\nStudents in " + assignedCourse.getCourseCode() + ":");
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nStudents in ").append(assignedCourse.getCourseCode()).append(":\n");
         if(assignedCourse.getEnrolledStudents().isEmpty()) {
-            System.out.println("No students enrolled.");
+            sb.append("No students enrolled.\n");
         } else {
             for (Student s : assignedCourse.getEnrolledStudents()) {
-                System.out.println("- " + s.getEmail());
+                sb.append("- ").append(s.getEmail()).append("\n");
             }
         }
+        return sb.toString();
     }
 
     @Override
     public void showDashboard() {
+        // Console implementation
         if (assignedCourse == null) {
             System.out.println("\n=== Teaching Assistant Menu ===");
             System.out.println("You are not yet assigned to a course.");
@@ -96,15 +89,23 @@ public class TeachingAssistant extends Student {
             System.out.print("Choose option: ");
             int choice = sc.nextInt();
 
-            if (choice == 1) {
-                viewEnrolledStudents();
-            } else if (choice == 2) {
-                assignGrade();
-            } else if (choice == 3) {
-                logout();
-                break;
-            } else {
-                System.out.println("Invalid choice.");
+            try {
+                if (choice == 1) {
+                    System.out.println(getEnrolledStudentsAsString());
+                } else if (choice == 2) {
+                    System.out.print("Enter Student Email: ");
+                    String email = sc.next();
+                    System.out.print("Enter Grade (4-10 for pass, 0 for fail): ");
+                    int grade = sc.nextInt();
+                    assignGrade(email, grade);
+                } else if (choice == 3) {
+                    logout();
+                    break;
+                } else {
+                    System.out.println("Invalid choice.");
+                }
+            } catch (Exception e) {
+                System.out.println("[ERROR] " + e.getMessage());
             }
         }
     }

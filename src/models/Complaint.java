@@ -21,6 +21,8 @@ public class Complaint implements Serializable {
 
     public int getComplaintID() { return complaintID; }
     public String getStatus() { return status; }
+    public Student getStudent() { return student; }
+
 
     public void resolveComplaint(String resolution) {
         this.status = "Resolved";
@@ -28,9 +30,14 @@ public class Complaint implements Serializable {
     }
 
     public void displayComplaint() {
-        System.out.println("ID: " + complaintID + " | By: " + student.getEmail() + " | Status: " + status);
-        System.out.println("Issue: " + description);
-        System.out.println("Resolution: " + resolutionDetails);
-        System.out.println("--------------------------------------------------");
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + complaintID + " | By: " + student.getEmail() + " | Status: " + status + "\n" +
+               "Issue: " + description + "\n" +
+               "Resolution: " + resolutionDetails + "\n" +
+               "--------------------------------------------------";
     }
 }
